@@ -12,6 +12,11 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/exuric/Vandis/main/Va
 Everything else (UI library and modules) is pulled from this repo on first run
 and cached locally, so only the line above is needed each time.
 
+Press **Delete** to toggle the menu.
+
+The library caches to `Vandis/`, so after updating the repo you may need to
+delete that folder (or just `lib/universe.lua` inside it) to pick up changes.
+
 ## Layout
 
 | Path                  | What it is                                        |
@@ -82,5 +87,6 @@ All of it runs unconditionally at render rate. This version:
 - Loader/structure inspiration: [QuotasHub](https://github.com/Insertl/QuotasHub)
   (open source), rewritten for this project
 
-Both upstream projects are open source; their work is credited above and the UI
-library is vendored unmodified in `lib/universe.lua`.
+Both upstream projects are open source; their work is credited above. The UI
+library is vendored in `lib/universe.lua` with one local change: the menu toggle
+key was moved from `Insert` to `Delete`.
