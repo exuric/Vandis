@@ -15,8 +15,16 @@
 
 local REPO = 'exuric/Vandis'
 local REF = 'main'
+
+--[[
+	Bump this whenever any module or the library changes. It namespaces the
+	local cache folder, so a stale cached copy can never shadow an update -
+	which is exactly what happened when the keybind change appeared not to work.
+--]]
+local VERSION = '1'
+
 local FOLDER = 'Vandis'
-local CACHE = FOLDER .. '/'
+local CACHE = FOLDER .. '/v' .. VERSION .. '/'
 
 local RS = game:GetService('ReplicatedStorage')
 local UIS = game:GetService('UserInputService')

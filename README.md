@@ -12,10 +12,11 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/exuric/Vandis/main/Va
 Everything else (UI library and modules) is pulled from this repo on first run
 and cached locally, so only the line above is needed each time.
 
-Press **Delete** to toggle the menu.
+Press **Delete** to toggle the menu. `Insert` and `` ` `` also work, because
+executors and the Roblox client each swallow some of these keys.
 
-The library caches to `Vandis/`, so after updating the repo you may need to
-delete that folder (or just `lib/universe.lua` inside it) to pick up changes.
+If the menu does not appear at all after loading, delete the `Vandis` folder in
+your executor's filesystem and run the load line again.
 
 ## Layout
 

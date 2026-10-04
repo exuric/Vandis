@@ -156,26 +156,61 @@ function library.new(library_title, cfg_location)
         Cursor.Position = UDim2.new(0, mouse.X, 0, mouse.Y + 36)
     end)
 
-	ScreenGui.Parent = game:GetService("CoreGui")
+	--[[
+        Host the gui where it actually renders.
+
+        Parenting a ScreenGui straight into CoreGui silently fails to draw on a
+        lot of executors, which looks exactly like "the keybind does nothing" -
+        Enabled flips, you just never see it. PlayerGui + a high DisplayOrder is
+        the combination that renders everywhere.
+    --]]
+    do
+        local playerGui = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
+        local hosted = false
+        if playerGui then
+            hosted = pcall(function() ScreenGui.Parent = playerGui end)
+        end
+        if not hosted or not ScreenGui.Parent then
+            pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
+        end
+    end
+    ScreenGui.DisplayOrder = 999
 
     function menu.IsOpen()
-        return menu.open
+        return ScreenGui.Enabled
     end
+
     function menu.SetOpen(State)
-        ScreenGui.Enabled = state
+        ScreenGui.Enabled = State and true or false
+        menu.open = ScreenGui.Enabled
     end
+
+    menu.open = ScreenGui.Enabled
+
+    --[[
+        Several bindings on purpose: both the Roblox client and executors eat
+        some of these keys, so whichever one gets swallowed does not matter.
+        The original handler also ran a `while ScreenGui.Enabled` render loop
+        which could wedge the toggle, so the toggle itself is now a one-liner.
+    --]]
+    local TOGGLE_KEYS = {
+        [Enum.KeyCode.Delete] = true,
+        [Enum.KeyCode.Insert] = true,
+        [Enum.KeyCode.Backquote] = true,
+    }
 
     uis.InputBegan:Connect(function(key)
-        if key.KeyCode ~= Enum.KeyCode.Delete then return end
+        if not TOGGLE_KEYS[key.KeyCode] then return end
+        menu.SetOpen(not ScreenGui.Enabled)
+    end)
 
-		ScreenGui.Enabled = not ScreenGui.Enabled
-        menu.open = ScreenGui.Enabled
-
-        while ScreenGui.Enabled do
-            uis.MouseIconEnabled = true
-            rs.RenderStepped:Wait()
+    -- Keep the cursor usable while the menu is up, otherwise it can be locked
+    -- by the game and the menu becomes unclickable.
+    rs.RenderStepped:Connect(function()
+        if ScreenGui.Enabled then
+            pcall(function() uis.MouseIconEnabled = true end)
         end
-	end)
+    end)
 
     local ImageLabel = library:create("ImageButton", {
         Name = "Main",
