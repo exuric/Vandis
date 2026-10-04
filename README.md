@@ -9,11 +9,25 @@ lets you actually pick the hitbox.
 loadstring(game:HttpGet("https://raw.githubusercontent.com/exuric/Vandis/main/Vandis.lua"))()
 ```
 
-Single file. No fetching, no `require`, no `ModuleScript`, no cache, no remote
-dependency. Press **Delete** to toggle the menu (`Insert` and `` ` `` also work).
+Single file, no fetching, no `require`, no `ModuleScript`, no cache.
 
-If anything goes wrong at startup the menu is replaced by a red panel showing
-the actual error, and the same text is printed to the executor console.
+- **RightShift** toggles the menu (Abyss default).
+- **Delete** and `` ` `` also toggle it.
+
+If anything fails during startup a red panel appears with the actual error, and
+the same text is printed to the executor console.
+
+## UI
+
+Built on [Abyss](https://github.com/Eazvy/UILibs/tree/main/Librarys/Abyss). The
+library source is vendored inline (upstream lines 1-4257 of
+`Librarys/Abyss/Example`, which is the library plus a demo; the demo half is
+dropped). Because the library exposes its table as a local in the same chunk,
+loading the script runs the library and then wires the modules up in one go.
+
+API used: `Library.Window`, `Window:Tab`, `Tab:Section`, and the
+`Toggle` / `Slider` / `Dropdown` / `Keybind` / `Label` elements, with values
+read back from `Library.Flags`.
 
 ## Silent aim — hitting the head
 
@@ -33,11 +47,12 @@ problem, so it is exposed as options instead of hardcoded.
 | `show fov` | |
 | `team check` / `neutral is enemy` / `require alive` | |
 
+`Ctrl+P` marks the current target as a priority target (own colour set).
+
 ## ESP
 
-`Delete` opens the menu; per-group toggles for enemy and teammates, plus shared
-sliders for max distance, fade, text size and box aspect, and toggles for
-outlines, short names and distance-in-name.
+Per-group toggles for enemy and teammates, sliders for max distance, fade, text
+size and box aspect, and toggles for outlines, short names and distance-in-name.
 
 ### Why this one does not lag
 
@@ -66,12 +81,13 @@ All unconditional, all at render rate. This version:
 
 ## Credits
 
+- UI library: [Abyss](https://github.com/Eazvy/UILibs/tree/main/Librarys/Abyss),
+  vendored inline
 - ESP design and feature set: [Seere](https://github.com/0f76/seere_v3)
 - UI/ESP reference collection: [Eazvy/UILibs](https://github.com/Eazvy/UILibs)
 - Loader/structure inspiration: [QuotasHub](https://github.com/Insertl/QuotasHub)
   (open source), rewritten for this project
 
 Vape V4's UI library (`NewGuiLibrary.lua`) is only distributed from
-`vxperblx.xyz`, which no longer resolves, and the public Vape V4 copies just
-reference that URL without shipping the file. The UI here is therefore written
-from scratch in the same style rather than depending on a dead host.
+`vxperblx.xyz`, which no longer resolves, and the public Vape V4 copies only
+reference that URL without shipping the file. Abyss is used instead.
