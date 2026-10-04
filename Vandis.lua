@@ -152,9 +152,22 @@ do
 		--
 		local Utility = {}
 		--
-		getgenv().Library = Library
-		getgenv().Utility = Utility
-		syn.protect_gui(InputGUI)
+		-- patched: upstream indexed these executor globals unguarded, which
+		-- crashes on any executor that does not provide them.
+		do
+			local env = (type(getgenv) == "function" and getgenv())
+				or (type(getrenv) == "function" and getrenv())
+			or nil
+			if type(env) == "table" then
+				env.Library = Library
+				env.Utility = Utility
+			end
+			local protect = (type(syn) == "table" and syn.protect_gui)
+				or (type(env) == "table" and env.protect_gui)
+			if type(protect) == "function" then
+				pcall(protect, InputGUI)
+			end
+		end
 		-----------------------------------------------------------------
 		do
 		    Utility.AddInstance = function(NewInstance, Properties)
