@@ -66,9 +66,10 @@ do
 
 	-- environment probe: printed immediately so the console shows something
 	-- useful even when the library dies later.
-	print(('[Vandis] v%s probe: drawing=%s player=%s gui=%s gameProcessedEvent=n/a'):format(
+	print(('[Vandis] v%s probe: drawing=%s drawingNew=%s player=%s gui=%s'):format(
 		VERSION,
-		tostring(type(Drawing) == 'function'),
+		tostring(type(Drawing)),
+		tostring(Drawing ~= nil and type(Drawing.new) == 'function'),
 		tostring(lplr and lplr.Name or 'nil'),
 		tostring(playerGui ~= nil)
 	))
@@ -4648,7 +4649,12 @@ do
 		
 		local sqrt, abs, floor, min, max = math.sqrt, math.abs, math.floor, math.min, math.max
 		local v2, v3 = Vector2.new, Vector3.new
-		local haveDrawing = type(Drawing) == 'function'
+		--[[
+			`type(Drawing)` is NOT "function" in Roblox - Drawing is a userdata library,
+			so a `type(Drawing) == 'function'` guard silently disables every Drawing we
+			try to create. Probe for Drawing.new instead.
+		--]]
+		local haveDrawing = (Drawing ~= nil and type(Drawing.new) == 'function')
 		
 		local espFolder = mk('Folder', { Name = 'VandisESP' }, game:GetService('CoreGui'))
 		
@@ -5139,8 +5145,16 @@ do
 		local aimKey, espKey
 		
 		guard('ui/window', function()
+			-- Abyss draws its own arrow cursor over the menu. Drop it before the window
+			-- is built, because that is when AddCursor gets called.
+			if type(Utility) == 'table' then
+				Utility.AddCursor = function() end
+			end
+		
 			local Window = Library.Window('Vandis', Vector2.new(520, 600))
 			Window.Watermark('Vandis')
+			-- no slide/fade animation on open
+			Window.ToggleAnime(false)
 		
 			local aimTab = Window:Tab('aimbot')
 		
@@ -5271,25 +5285,36 @@ do
 			end
 		end)
 		
-		RunService.RenderStepped:Connect(function()
-			erender()
+		local espErrorShown = false
 		
-			if CFG.aim.Enabled then
-				refreshTarget(false)
-				if CFG.aim.ShowFOV then
-					ensureFOV()
-				end
-				if fovCircle then
-					fovCircle.Visible = CFG.aim.ShowFOV
+		RunService.RenderStepped:Connect(function()
+			-- A throw in here would otherwise repeat every frame and silently leave the
+			-- ESP blank, so surface the first one.
+			local ok, err = pcall(function()
+				erender()
+		
+				if CFG.aim.Enabled then
+					refreshTarget(false)
 					if CFG.aim.ShowFOV then
-						fovCircle.Position = v2(mouse.X - CFG.aim.FOV, mouse.Y - CFG.aim.FOV)
-						fovCircle.Size = v2(CFG.aim.FOV * 2, CFG.aim.FOV * 2)
+						ensureFOV()
 					end
+					if fovCircle then
+						fovCircle.Visible = CFG.aim.ShowFOV
+						if CFG.aim.ShowFOV then
+							fovCircle.Position = v2(mouse.X - CFG.aim.FOV, mouse.Y - CFG.aim.FOV)
+							fovCircle.Size = v2(CFG.aim.FOV * 2, CFG.aim.FOV * 2)
+						end
+					end
+				else
+					aimPart = nil
+					aimEntry = nil
+					if fovCircle then fovCircle.Visible = false end
 				end
-			else
-				aimPart = nil
-				aimEntry = nil
-				if fovCircle then fovCircle.Visible = false end
+			end)
+		
+			if not ok and not espErrorShown then
+				espErrorShown = true
+				fail('esp/render', err)
 			end
 		end)
 		
