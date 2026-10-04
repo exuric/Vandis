@@ -1,0 +1,13 @@
+-- executor cache / local writes
+Vandis/
+*.log
+
+-- editor
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+
+-- os
+.DS_Store
