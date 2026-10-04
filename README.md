@@ -6,16 +6,31 @@ lets you actually pick the hitbox.
 ## Load
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/exuric/Vandis/main/Vandis.lua"))()
+loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/exuric/Vandis@main/Vandis.lua"))()
 ```
+
+> **Use the jsDelivr link, not `raw.githubusercontent.com`.** GitHub's raw CDN
+> serves stale copies for a long time after a push - it was still handing out a
+> 251 KB build hours after the 264 KB one was committed. jsDelivr invalidates
+> correctly. If the menu is missing a feature you know is in the readme, you are
+> almost certainly on a cached file.
 
 Single file, no fetching, no `require`, no `ModuleScript`, no cache.
 
 - **RightShift** toggles the menu (Abyss default).
-- **Delete** and `` ` `` also toggle it.
+- **Delete** and `` ` `` also toggle it, and these deliberately ignore
+  `gameProcessedEvent` so they still work when the game has a gui focused.
 
-If anything fails during startup a red panel appears with the actual error, and
-the same text is printed to the executor console.
+If anything fails during startup a red panel appears with the error and a
+traceback, and the same text is printed to the executor console. The first line
+printed is always an environment probe:
+
+```
+[Vandis] v5 probe: drawing=true player=<name> gui=true gameProcessedEvent=n/a
+```
+
+so you can tell instantly whether the failure is a missing `Drawing` API, no
+`PlayerGui`, or something inside the library.
 
 ## UI
 
